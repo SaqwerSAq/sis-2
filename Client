@@ -1,0 +1,47 @@
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+public class Client {
+    public static void main(String[] args) {
+        try (Socket socket = new Socket("localhost", 12345)) {
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                System.out.print("Enter shape name (Circle/Rectangle) or 'Q' to quit: ");
+                String shapeType = scanner.nextLine();
+                if (shapeType.equalsIgnoreCase("Q")) {
+                    output.writeObject("Q");
+                    output.flush();
+                    break;
+                }
+                Shape shape = null;
+                if (shapeType.equalsIgnoreCase("Circle")) {
+                    System.out.print("Enter radius: ");
+                    double radius = scanner.nextDouble();
+                    shape = new Circle(radius);
+                    scanner.nextLine();
+                } else if (shapeType.equalsIgnoreCase("Rectangle")) {
+                    System.out.print("Enter width: ");
+                    double width = scanner.nextDouble();
+                    System.out.print("Enter height: ");
+                    double height = scanner.nextDouble();
+                    shape = new Rectangle(width, height);
+                    scanner.nextLine();
+                } else {
+                    System.out.println("Unknown shape. Try again.");
+                    continue;
+                }
+                output.writeObject(shape);
+                output.flush();
+                double area = (double) input.readObject();
+                System.out.println("Answer is: " + area);
+            }
+            output.close();
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
