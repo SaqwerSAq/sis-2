@@ -1,0 +1,28 @@
+import java.io.*;
+import java.net.*;
+public class Server {
+    public static void main(String[] args) {
+        try (ServerSocket serverSocket = new ServerSocket(12345)) {
+            Socket socket = serverSocket.accept();
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            while (true) {
+                Object obj = input.readObject();
+                if (obj instanceof String && obj.equals("Q")) {
+                    break;
+                }
+                if (obj instanceof Shape) {
+                    Shape shape = (Shape) obj;
+                    double area = shape.calculateArea();
+                    output.writeObject(area);
+                    output.flush();
+                }
+            }
+            input.close();
+            output.close();
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
